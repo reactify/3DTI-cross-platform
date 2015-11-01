@@ -1,0 +1,18 @@
+#N canvas 536 209 450 300 10;
+#X obj 83 150 stereospread~;
+#X obj 181 69 hsl 128 15 0 1 0 1 empty empty empty -2 -8 0 10 -262144
+-1 -1 12700 1;
+#X obj 83 100 readsf~ 2;
+#X msg 83 28 open ../rain.wav;
+#X msg 97 69 1;
+#X msg 127 69 0;
+#X obj 83 193 dac~ 1;
+#X obj 158 193 dac~ 2;
+#X connect 0 0 6 0;
+#X connect 0 1 7 0;
+#X connect 1 0 0 2;
+#X connect 2 0 0 0;
+#X connect 2 1 0 1;
+#X connect 3 0 2 0;
+#X connect 4 0 2 0;
+#X connect 5 0 2 0;

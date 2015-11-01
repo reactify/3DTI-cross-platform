@@ -1,0 +1,3 @@
+[submodule "examples/example-ios/TheAmazingAudioEngine"]
+	path = examples/example-ios/TheAmazingAudioEngine
+	url = https://github.com/TheAmazingAudioEngine/TheAmazingAudioEngine
