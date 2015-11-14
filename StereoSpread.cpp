@@ -10,7 +10,7 @@
 
 StereoSpread::StereoSpread() : width(1.f)
 {
-	
+	printf("StereoSpread Loaded \n");
 }
 
 StereoSpread::~StereoSpread()
