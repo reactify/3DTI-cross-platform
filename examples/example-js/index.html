@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>StereoSpread</title>
+
+    <script type="application/javascript" src="./StereoSpread.js"></script>
+    <style>
+    .cell {
+      display: table-cell;
+      padding-right: 10px;
+      padding-top: 10px
+    }
+
+    .row {
+      display: table-row;
+    }
+    </style>
+
+    <script type="text/javascript">
+      var isPlaying = false;
+
+      var context = null;
+      var buffer = null;
+      var bufferSource = null;
+      var audioProcessor = null;
+
+      window.onload = function(e) 
+      {
+        var blockSize = 4096
+
+        context = new (window.AudioContext || window.webkitAudioContext);
+        audioProcessor = context.createScriptProcessor(blockSize, 2, 2); 
+
+        // Load audio file
+        var getSound = new XMLHttpRequest();
+        getSound.open("GET", "../rain.wav", true);
+        getSound.responseType = "arraybuffer";
+        getSound.onload = function() {
+          context.decodeAudioData(getSound.response, function(buffer) {
+            this.buffer = buffer;
+          });
+        }
+        getSound.send();
+  
+        // Our process loop
+        audioProcessor.onaudioprocess = function(e) 
+        {   
+          var inputBuffer = e.inputBuffer;
+          var outputBuffer = e.outputBuffer;
+
+          for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) 
+          {
+            var inputData = inputBuffer.getChannelData(channel);
+            var outputData = outputBuffer.getChannelData(channel);
+
+            for (var sample = 0; sample < inputBuffer.length; sample++) 
+            {  
+              outputData[sample] = inputData[sample];
+              outputData[sample] += ((Math.random() * 2) - 1) * 0.2;         
+            }
+          }
+        }
+
+        document.getElementById("playButton").textContent = "Play";
+        
+        isPlaying = false;
+
+        updateWidthSlider(0.5);
+      };
+
+      function start() 
+      {
+        bufferSource = context.createBufferSource();
+        bufferSource.buffer = buffer;
+        bufferSource.loop = 1;
+        bufferSource.start(0);  
+
+        bufferSource.connect(audioProcessor);
+        audioProcessor.connect(context.destination);
+
+        isPlaying = true;
+
+        document.getElementById("playButton").textContent = "Pause";
+      };
+
+      function stop() 
+      {
+        bufferSource.stop(0);
+        bufferSource.disconnect(audioProcessor);
+        audioProcessor.disconnect(context.destination);
+
+        isPlaying = false;
+
+        document.getElementById("playButton").textContent = "Play";
+      };
+
+      function togglePlayback(element) {
+        (isPlaying) ? stop() : start();
+      };
+      
+      function updateWidthSlider(value) 
+      {
+        document.getElementById("displayWidthSlider").textContent = Number(value).toFixed(2);
+        console.log(value);
+      };
+        
+    </script>
+
+  </head>
+
+  <body>
+    <div>
+
+      <div>
+        <button style="padding: 20px;" type="button" id="playButton" onclick="togglePlayback(this);"/>
+      </div>
+
+      <div class="table">
+        
+        <div class="row">
+          <div class="cell">
+            <input id="widthSlider" type="range" min="0" max="1" step="0.01" value="0.5" onchange="updateWidthSlider(value);" oninput="updateWidthSlider(value)">
+          </div>
+          <div class="cell" id="displayWidthSlider"></div>
+          <div class="cell"><strong>Width</strong></div>
+        </div>
+
+      </div>
+
+    </div>
+  </body>
+</html>
