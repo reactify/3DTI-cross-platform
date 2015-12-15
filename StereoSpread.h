@@ -1,7 +1,4 @@
 //
-//  StereoSpread.hpp
-//  example-ios
-//
 //  Created by Ragnar Hrafnkelsson on 01/11/2015.
 //  Copyright © 2015 Reactify. All rights reserved.
 //
@@ -17,6 +14,8 @@ public:
 	StereoSpread();
 	
 	~StereoSpread();
+	
+	float getWidth() { return width; };
 	
 	void setWidth(float w);
 	

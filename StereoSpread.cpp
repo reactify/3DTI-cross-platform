@@ -1,7 +1,4 @@
 //
-//  StereoSpread.cpp
-//  example-ios
-//
 //  Created by Ragnar Hrafnkelsson on 01/11/2015.
 //  Copyright © 2015 Reactify. All rights reserved.
 //
@@ -22,6 +19,7 @@ void StereoSpread::setWidth(float w)
 {
 	if (w < 0.f) w = 0.f; if (w > 1.f) w = 1.f;
 	width = w;
+	printf("Width: %f \n", width);
 }
 
 // http://musicdsp.org/showArchiveComment.php?ArchiveID=256

@@ -19,16 +19,24 @@
 
     <script type="text/javascript">
       var isPlaying = false;
+      var blockSize = 4096
 
       var context = null;
       var buffer = null;
       var bufferSource = null;
       var audioProcessor = null;
+      // var processBuffer = new Float32Array(Module.HEAPF32.buffer, Module._malloc(blockSize * 4), blockSize);
+
+      var size = 4096,
+          BPE = Float32Array.BYTES_PER_ELEMENT,
+          inBuf = Module._malloc(size * BPE),
+          outBuf = Module._malloc(size * BPE);
+
+      var stereoSpread = new Module.StereoSpread();
+      stereoSpread.setWidth(0.75);
 
       window.onload = function(e) 
       {
-        var blockSize = 4096
-
         context = new (window.AudioContext || window.webkitAudioContext);
         audioProcessor = context.createScriptProcessor(blockSize, 2, 2); 
 
@@ -57,8 +65,17 @@
             for (var sample = 0; sample < inputBuffer.length; sample++) 
             {  
               outputData[sample] = inputData[sample];
-              outputData[sample] += ((Math.random() * 2) - 1) * 0.2;         
+              
+              inBuf[sample] = inputData[sample];
+              outBuf[sample] = 0.0;
             }
+
+            // TODO: Stereospread process
+
+            // for (var sample = 0; sample < inputBuffer.length; sample++) 
+            // {
+            //   console.log(outBuf[sample]);  
+            // }
           }
         }
 
@@ -102,7 +119,8 @@
       function updateWidthSlider(value) 
       {
         document.getElementById("displayWidthSlider").textContent = Number(value).toFixed(2);
-        console.log(value);
+    
+        stereoSpread.setWidth(parseFloat(value));
       };
         
     </script>
