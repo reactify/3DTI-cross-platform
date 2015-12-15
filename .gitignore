@@ -49,10 +49,9 @@ Carthage/Build
 
 fastlane/report.xml
 fastlane/screenshots
+
+# emscripten
+#
 examples/WebIDLGrammar.pkl
-
 examples/example-js/glue.cpp
-
 examples/example-js/glue.js
-
-examples/example-js/include.cpp
