@@ -1,8 +1,3 @@
 #!/bin/sh
 
-python ~/emsdk/emscripten/1.35.0/tools/webidl_binder.py ./example-js/StereoSpread.idl ./example-js/glue
-
-~/emsdk/emscripten/1.35.0//emcc ../StereoSpread.cpp ./example-js/include.cpp --post-js ./example-js/glue.js -o ./example-js/StereoSpread.js
-
-
-#~/emsdk/emscripten/1.35.0/emcc --bind ../StereoSpread.cpp -o ./example-js/StereoSpread.js #-s EXPORTED_FUNCTIONS="['_setWidth']"
+~/emsdk/emscripten/1.35.0/emcc ./example-js/StereoSpreadWrapper.cpp -o ./example-js/StereoSpreadLib.js -s EXPORTED_FUNCTIONS="['_stereospread_new', '_stereospread_set_width', '_stereospread_process_inline', '_stereospread_free']"

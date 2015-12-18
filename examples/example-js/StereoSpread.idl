@@ -1,8 +1,0 @@
-
-
-interface StereoSpread 
-{
-        void StereoSpread();
-        float getWidth();
-        void setWidth(float w);
-};

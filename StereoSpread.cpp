@@ -19,7 +19,7 @@ void StereoSpread::setWidth(float w)
 {
 	if (w < 0.f) w = 0.f; if (w > 1.f) w = 1.f;
 	width = w;
-	printf("Width: %f \n", width);
+	printf("Set Width: %f \n", width);
 }
 
 // http://musicdsp.org/showArchiveComment.php?ArchiveID=256
@@ -40,6 +40,21 @@ void StereoSpread::process(float **inBuffers, float **outBuffers, const int buff
 		
 		outLeft[i] = m - s;
 		outRight[i] = m + s;
+	}
+}
+
+void StereoSpread::process_inline(float *inBuffer, float *outBuffer, const int bufferSize)
+{	
+	// calculate scale coefficient
+	float coef_S = width * 0.5f;
+	
+	for (int i = 0; i < bufferSize * 2; i++)
+	{
+		float m = (inBuffer[i] + inBuffer[i + bufferSize]) * 0.5f;
+		float s = (inBuffer[i + bufferSize] - inBuffer[i]) * coef_S;
+		
+		outBuffer[i] = m - s;
+		outBuffer[i + bufferSize] = m + s;
 	}
 }
 

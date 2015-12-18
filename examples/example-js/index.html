@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>StereoSpread</title>
 
-    <script type="application/javascript" src="./StereoSpread.js"></script>
+    <script type="application/javascript" src="./StereoSpreadLib.js"></script>
     <style>
     .cell {
       display: table-cell;
@@ -19,21 +19,41 @@
 
     <script type="text/javascript">
       var isPlaying = false;
-      var blockSize = 4096
+      var blockSize = 4096;
+      var numberOfChannels = 2;
+      var lengthInSamples = blockSize * numberOfChannels;
 
       var context = null;
       var buffer = null;
       var bufferSource = null;
       var audioProcessor = null;
-      // var processBuffer = new Float32Array(Module.HEAPF32.buffer, Module._malloc(blockSize * 4), blockSize);
+      var processBuffer = new Float32Array(Module.HEAPF32.buffer, Module._malloc(lengthInSamples * 4), lengthInSamples);
 
-      var size = 4096,
-          BPE = Float32Array.BYTES_PER_ELEMENT,
-          inBuf = Module._malloc(size * BPE),
-          outBuf = Module._malloc(size * BPE);
+      // Import StereoSpread Functions
+      var ss_constructor = Module.cwrap('stereospread_new', 'number', []);
+      var ss_destructor = Module.cwrap('stereospread_free', 'number', ['number']);
+      var ss_setWidth = Module.cwrap('stereospread_set_width', 'number', ['number', 'number']);
+      var ss_process = Module.cwrap('stereospread_process_inline', 'number', ['number', 'number', 'number']);
 
-      var stereoSpread = new Module.StereoSpread();
-      stereoSpread.setWidth(0.75);
+      // Declare StereoSpread class
+      function Stereospread() {
+        this.ptr = ss_constructor();
+      }
+
+      Stereospread.prototype.destroy = function () {
+        ss_destructor(this.ptr);
+      };
+
+      Stereospread.prototype.setWidth = function (x) {
+        ss_setWidth(this.ptr, x);
+      };
+
+      Stereospread.prototype.process = function (inBuffer, outBuffer, bufferSize) {
+        ss_process(this.ptr, inBuffer, outBuffer, bufferSize);
+      };
+
+      // Construct StereoSpread instance
+      var stereoSpread = new Stereospread();
 
       window.onload = function(e) 
       {
@@ -54,34 +74,35 @@
         // Our process loop
         audioProcessor.onaudioprocess = function(e) 
         {   
+          // Copy inputBuffers from file to intermediary process buffer
           var inputBuffer = e.inputBuffer;
-          var outputBuffer = e.outputBuffer;
-
-          for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) 
+          for (var channel = 0; channel < inputBuffer.numberOfChannels; channel++) 
           {
             var inputData = inputBuffer.getChannelData(channel);
-            var outputData = outputBuffer.getChannelData(channel);
+            var offset = channel * inputBuffer.length;
 
-            for (var sample = 0; sample < inputBuffer.length; sample++) 
-            {  
-              outputData[sample] = inputData[sample];
-              
-              inBuf[sample] = inputData[sample];
-              outBuf[sample] = 0.0;
+            for (var j = 0; j < inputData.length; ++j) {
+                processBuffer[offset + j] = inputData[j]; 
             }
+          }
 
-            // TODO: Stereospread process
+          // Process StereoSpread
+          stereoSpread.process(processBuffer.byteOffset, processBuffer.byteOffset, inputBuffer.length);
 
-            // for (var sample = 0; sample < inputBuffer.length; sample++) 
-            // {
-            //   console.log(outBuf[sample]);  
-            // }
+          // Copy process buffer to output buffers
+          var outputBuffer = e.outputBuffer;
+          for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) 
+          {
+            var outputData = outputBuffer.getChannelData(channel);
+            var offset = channel * blockSize;
+
+            for (var j = 0; j < blockSize; ++j) {
+                outputData[j] = processBuffer[offset + j]; 
+            }
           }
         }
 
         document.getElementById("playButton").textContent = "Play";
-        
-        isPlaying = false;
 
         updateWidthSlider(0.5);
       };

@@ -20,6 +20,8 @@ public:
 	void setWidth(float w);
 	
 	void process(float **inBuffer, float **outBuffers, const int bufferSize);
+	
+	void process_inline(float *inBuffer, float *outBuffer, const int bufferSize);
 
 private:
 	
